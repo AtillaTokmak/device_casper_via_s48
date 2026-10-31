@@ -1,0 +1,3 @@
+# MediaTek Audio HAL Policy Rules
+allow hal_audio_default ion_device:chr_file { read write open ioctl };
+allow hal_audio_default audio_device:chr_file { read write open ioctl };

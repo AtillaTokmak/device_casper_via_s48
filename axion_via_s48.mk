@@ -1,11 +1,14 @@
 #
 # Copyright (C) 2026 The LineageOS / AxionOS Project
 #
-# Product Definition for Casper VIA S48
+# Product Definition for Casper VIA S48 (MT8168 / F716)
 #
 
-# Inherit from axion common product
-$(call inherit-product, vendor/axion/config/common_full_tablet_wifionly.mk)
+# Inherit from AxionOS / LineageOS / AOSP common tablet definitions
+$(call inherit-product-if-exists, vendor/axion/config/common_full_tablet_wifionly.mk)
+$(call inherit-product-if-exists, vendor/axion/config/common.mk)
+$(call inherit-product-if-exists, vendor/lineage/config/common_full_tablet_wifionly.mk)
+$(call inherit-product-if-exists, build/make/target/product/full_base.mk)
 
 # Inherit from device configuration
 $(call inherit-product, device/casper/via_s48/device.mk)

@@ -30,31 +30,34 @@ TARGET_KERNEL_HEADER_ARCH := arm64
 TARGET_KERNEL_SOURCE := kernel/casper/mt8168
 TARGET_KERNEL_CONFIG := tb8168p1_64_bsp_f716_defconfig
 
-# Kernel Image Geometry (Header v2)
-BOARD_KERNEL_BASE := 0x00000000
+# Kernel Image Geometry (Android Boot v2)
+# Verified against boot_oc_2.1ghz_android16.img and MT8168 BROM bootloader specifications
+BOARD_KERNEL_BASE := 0x40000000
 BOARD_KERNEL_PAGESIZE := 2048
-BOARD_KERNEL_OFFSET := 0x40080000
-BOARD_RAMDISK_OFFSET := 0x55000000
-BOARD_SECOND_OFFSET := 0x40f00000
-BOARD_TAGS_OFFSET := 0x54000000
-BOARD_DTB_OFFSET := 0x0000000054000000
+BOARD_KERNEL_OFFSET := 0x00080000
+BOARD_RAMDISK_OFFSET := 0x04000000
+BOARD_TAGS_OFFSET := 0x00000100
+BOARD_DTB_OFFSET := 0x00000100
 BOARD_BOOT_HEADER_VERSION := 2
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 
 # Kernel Command Line
+# NOTE: 'androidboot.selinux=permissive' is used for bring-up until all legacy Android 10 vendor policies are mapped.
 BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 buildvariant=user androidboot.selinux=permissive
 
-# Partition Sizes (eMMC 32 GB geometry)
-BOARD_BOOTIMAGE_PARTITION_SIZE := 33554432
-BOARD_RECOVERYIMAGE_PARTITION_SIZE := 33554432
-BOARD_CACHEIMAGE_PARTITION_SIZE := 117440512
+# Physical Partition Sizes (eMMC 32 GB Geometry - Verified via MT8168 Scatter File)
+BOARD_BOOTIMAGE_PARTITION_SIZE := 33554432       # 32 MB
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 33554432   # 32 MB
+BOARD_CACHEIMAGE_PARTITION_SIZE := 117440512     # 112 MB
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 24326963200
 BOARD_FLASH_BLOCK_SIZE := 131072
 
-# Dynamic Partitions (super.img)
-BOARD_SUPER_PARTITION_SIZE := 4508876800
+# Dynamic Partitions (Super Partition Geometry)
+# Hardware super partition size: 0x15f1b0000 = 5,890,572,288 bytes (5617 MB)
+# Main dynamic partition group reserved for system, vendor, and product
+BOARD_SUPER_PARTITION_SIZE := 5890572288
 BOARD_SUPER_PARTITION_GROUPS := main
-BOARD_MAIN_SIZE := 4504682496
+BOARD_MAIN_SIZE := 5886377984                    # 5890572288 minus 4MB metadata
 BOARD_MAIN_PARTITION_LIST := system vendor product
 
 # File Systems
@@ -65,11 +68,13 @@ BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
 TARGET_USERIMAGES_USE_EXT4 := true
 
-# VINTF Compatibility Matrix Level 4 (Android 10 Target Level)
+# VINTF Specifications
+# Target FCM Level 4 (Android 10) compatibility matrix
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := $(DEVICE_PATH)/vintf/compatibility_matrix.4.xml
+DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/vintf/manifest.xml
 
 # SELinux Policy
-BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
 
 # Media & Graphics
 TARGET_USES_HWC2 := true

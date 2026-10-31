@@ -1,27 +1,59 @@
-# Device Tree: Casper VIA S48 (MT8168 / F716)
+# Casper VIA S48 (MT8168) Android 16 Device Tree
 
-This repository contains the device-specific configuration tree for building AOSP, LineageOS, or AxionOS (Android 16 QPR2 / Baklava) on the **Casper VIA S48** tablet.
+This repository provides the official Android 16 (AxionOS 2.9 / API 36) device tree for the Casper VIA S48 tablet (SoC: MediaTek MT8168 / Board: F716).
 
-## Device Specifications
+---
 
-| Feature | Specification |
-| :--- | :--- |
-| **SoC** | MediaTek MT8168 |
-| **CPU** | Quad-Core ARM Cortex-A53 @ 2.0 GHz (Overclockable to 2.1 GHz) |
-| **GPU** | ARM Mali-G52 (Bifrost) |
-| **Motherboard / ODM** | `F716` / `sanmu` |
-| **RAM** | 2 GB LPDDR4 |
-| **Internal Storage** | 32 GB eMMC 5.1 |
-| **Display** | 8.0" IPS LCD, 800 x 1280 pixels @ 56.1 Hz (`jd9365da`) |
-| **Touchscreen** | Silead GSLX68X / MTK TPD |
-| **Battery** | 4000 mAh Li-Po |
-| **Stock OS Baseline** | Android 10 (`Casper_VIA_S48_0_20220606_C1.03`) |
-| **Target OS** | Android 16 (Baklava / API 36) |
+## 1. Specifications & Geometry
 
-## Android 16 Porting Fixes Integrated in This Tree
+* **SoC:** MediaTek MT8168 (4x ARM Cortex-A53 @ 2.0 GHz stock, up to 2.1 GHz overclocked)
+* **GPU:** ARM Mali-G52 MP1 (Bifrost)
+* **RAM:** 2 GB / 3 GB LPDDR4
+* **Storage:** 32 GB eMMC 5.1
+* **Display:** 8.0" / 10.1" IPS LCD (1280x800 WXGA) @ 60 Hz
+* **Touchscreen:** Silead GSL1680 (in-kernel MTK driver)
+* **Wireless:** MediaTek MT6631 Dual-Band 802.11ac Wi-Fi + Bluetooth 5.0
+* **Partition Scheme:** Dynamic Partitions (`super.img`):
+  * Physical Super Partition Size: `5,890,572,288` bytes (0x15f1b0000)
+  * Dynamic Partition Group: `main` (`5,886,377,984` bytes)
+  * Logical Partitions: `system`, `vendor`, `product`
+* **Boot Image Architecture:** Android Boot v2
+  * Kernel Load Base: `0x40000000`
+  * Kernel Offset: `0x00080000`
+  * Ramdisk Offset: `0x04000000`
+  * Tags Offset: `0x00000100`
+  * DTB Offset: `0x00000100`
 
-1. **Disable Force Encryption (DFE):** Stripped `fileencryption=aes-256-xts` and `checkpoint=block` from `rootdir/fstab.mt8168` to eliminate Keymaster 4.0 / Keystore2 deadlocks.
-2. **MP2 Codec UBSAN Fix:** Removed `OMX.MTK.AUDIO.DECODER.MP2` from `configs/media_codecs_mediatek_audio.xml` to prevent integer underflow SIGABRT in `system_server`.
-3. **VINTF Compatibility Level 4:** Packaged `vintf/compatibility_matrix.4.xml` to satisfy target-level 4 vendor manifest.
-4. **FUSE-BPF Override Properties:** Integrated `persist.sys.fuse.bpf.override=false` into `device.mk` for Linux 4.14 compatibility.
-5. **USB Gadget Controller:** Configured `sys.usb.controller=11201000.usb` and configfs triggers for instant ADB enumeration.
+---
+
+## 2. Integrated Android 16 Compatibility Solutions
+
+1. **MP2 Audio Codec Crash Fix:** Overlays `/vendor/etc/media_codecs_mediatek_audio.xml` without `OMX.MTK.AUDIO.DECODER.MP2`, preventing `AudioCapabilities::getDefaultFormat()` integer subtraction underflow in `libmedia_codeclist_capabilities.so`.
+2. **DFE Storage Configuration:** `rootdir/fstab.mt8168` disables File-Based Encryption (`fileencryption=aes-256-xts`) to avoid TrustKernel Keymaster 4.0 crypto deadlock on Android 16.
+3. **VINTF Target FCM Level 4:** Injects `vintf/compatibility_matrix.4.xml` to bridge Android 10 vendor HALs with Android 16 framework requirements.
+4. **FUSE-BPF Bypass:** Configures `persist.sys.fuse.bpf.override=false` and `persist.sys.phh.bpf=false` to use standard userspace FUSE daemon on Linux 4.14.
+5. **USB Gadget Binding:** Sets `sys.usb.controller=11201000.usb` for instant ADB enumeration.
+
+---
+
+## 3. Directory Layout
+
+```
+device_casper_via_s48/
+├── AndroidProducts.mk        # Product registration
+├── BoardConfig.mk            # Hardware, partition sizes, kernel geometry
+├── device.mk                 # Product packages, overlays, and copy rules
+├── axion_via_s48.mk          # AxionOS / LineageOS product definition
+├── rootdir/
+│   ├── fstab.mt8168          # Default DFE fstab
+│   ├── fstab.mt8168.fbe      # Reference FBE fstab
+│   ├── init.mt8168.rc        # MediaTek core init script
+│   └── init.mt8168.usb.rc    # USB gadget controller binding
+├── configs/
+│   └── media_codecs_mediatek_audio.xml
+├── vintf/
+│   ├── compatibility_matrix.4.xml
+│   └── manifest.xml
+├── overlay/                  # Tablet resource overlays
+└── sepolicy/vendor/          # Vendor SELinux policies
+```

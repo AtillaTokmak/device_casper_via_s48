@@ -1,0 +1,2 @@
+# Vold Storage Policy Rules
+allow vold block_device:blk_file { getattr read write open ioctl };

@@ -1,0 +1,18 @@
+#
+# Casper VIA S48 (MT8168) SELinux File Contexts
+#
+
+# Device nodes
+/dev/mali[0-9]*                     u:object_r:gpu_device:s0
+/dev/ion                            u:object_r:ion_device:s0
+/dev/mtk_disp                       u:object_r:graphics_device:s0
+/dev/mtk_cmdq                       u:object_r:graphics_device:s0
+/dev/wmtWifi                        u:object_r:wmtWifi_device:s0
+/dev/stpbt                          u:object_r:stpbt_device:s0
+
+# Vendor services
+/(vendor|system/vendor)/bin/hw/android\.hardware\.audio@5\.0-service-mediatek      u:object_r:hal_audio_default_exec:s0
+/(vendor|system/vendor)/bin/hw/android\.hardware\.graphics\.composer@2\.1-service   u:object_r:hal_graphics_composer_default_exec:s0
+/(vendor|system/vendor)/bin/hw/android\.hardware\.graphics\.allocator@2\.0-service  u:object_r:hal_graphics_allocator_default_exec:s0
+/(vendor|system/vendor)/bin/hw/android\.hardware\.media\.omx@1\.0-service           u:object_r:mediacodec_exec:s0
+/(vendor|system/vendor)/bin/hw/android\.hardware\.keymaster@4\.0-service\.mtee      u:object_r:hal_keymaster_default_exec:s0

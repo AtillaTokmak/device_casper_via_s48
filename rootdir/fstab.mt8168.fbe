@@ -1,0 +1,40 @@
+#
+# Copyright (C) 2026 The LineageOS / AxionOS Project
+#
+# fstab.mt8168.fbe - Casper VIA S48 (MT8168 / F716)
+# Alternative configuration: Stock File-Based Encryption (FBE) enabled
+# Use only when hardware-backed KeyMint/Keymaster attestation is validated.
+#
+
+# Dynamic Partitions (Super Image)
+system   /system   ext4 ro wait,logical,first_stage_mount
+vendor   /vendor   ext4 ro wait,logical,first_stage_mount
+product  /product  ext4 ro wait,logical,first_stage_mount
+
+# Metadata Partition
+/dev/block/platform/bootdevice/by-name/md_udc   /metadata   ext4 noatime,nosuid,nodev,discard wait,formattable,first_stage_mount
+
+# Userdata Partition (FBE Active)
+/dev/block/platform/bootdevice/by-name/userdata  /data       ext4 noatime,nosuid,nodev,noauto_da_alloc wait,check,formattable,quota,resize,reservedsize=128m,fileencryption=aes-256-xts,checkpoint=block
+
+# Cache Partition
+/dev/block/platform/bootdevice/by-name/cache     /cache      ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable
+
+# NVRAM Data & Configuration
+/dev/block/platform/bootdevice/by-name/nvdata    /mnt/vendor/nvdata ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable
+/dev/block/platform/bootdevice/by-name/nvcfg     /mnt/vendor/nvcfg  ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable
+
+# Protection Partitions
+/dev/block/platform/bootdevice/by-name/protect1  /mnt/vendor/protect_f ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable
+/dev/block/platform/bootdevice/by-name/protect2  /mnt/vendor/protect_s ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable
+
+# Persistent Partition
+/dev/block/platform/bootdevice/by-name/frp       /persistent emmc defaults defaults
+
+# Boot & Recovery Partitions
+/dev/block/platform/bootdevice/by-name/boot      /boot       emmc defaults first_stage_mount,nofail
+/dev/block/platform/bootdevice/by-name/recovery  /recovery   emmc defaults first_stage_mount,nofail
+
+# External Storage & ZRAM
+/devices/platform/externdevice*                  auto        auto defaults voldmanaged=sdcard1:auto
+/dev/block/zram0                                 none        swap defaults zramsize=1073741824

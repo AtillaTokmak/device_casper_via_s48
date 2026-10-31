@@ -1,0 +1,3 @@
+# MediaTek Codec HAL Policy Rules
+allow mediacodec ion_device:chr_file { read write open ioctl };
+allow mediacodec gpu_device:chr_file { read write open ioctl };
