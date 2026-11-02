@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout Device Tree
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: device/casper/via_s48
 
@@ -91,13 +91,13 @@ jobs:
           sha256sum ../output/Casper_VIA_S48_Recovery.img > ../output/SHA256SUMS.txt
 
       - name: Upload Recovery Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Casper_VIA_S48_Recovery_${{ github.event.inputs.RECOVERY_FLAVOR }}
           path: output/*
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
