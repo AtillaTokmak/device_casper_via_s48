@@ -1,6 +1,6 @@
-# Casper VIA S48 (MT8168) Android 16 Device Tree
+# Casper VIA S48 (MT8168) Android Development Tree
 
-This repository provides the official Android 16 (AxionOS 2.9 / API 36) device tree for the Casper VIA S48 tablet (SoC: MediaTek MT8168 / Board: F716).
+This is an unofficial, community-maintained Android device tree for the Casper VIA S48 tablet (MediaTek MT8168 / F716). It documents device configuration and compatibility work associated with Android 16 AxionOS 2.9 GSI bring-up. It does not represent official LineageOS or AxionOS device support, or a verified complete source-built ROM.
 
 ---
 
@@ -57,3 +57,19 @@ device_casper_via_s48/
 ├── overlay/                  # Tablet resource overlays
 └── sepolicy/vendor/          # Vendor SELinux policies
 ```
+
+---
+
+## Project Status
+
+- **Working system baseline:** AxionOS 2.9 Android 16 GSI.
+- **Kernel:** Linux 4.14.141 with a tested 2.1 GHz experimental variant.
+- **Distribution format:** Raw Android partition images (`.img`), optionally compressed for download.
+- **PixelOS Android 16:** Unsuccessful boot test; archived in the development wiki.
+- **BlazeAOSP Android 17:** Unsuccessful experimental bring-up; not a supported release.
+
+This repository contains development configuration. A working GSI does not establish that a complete ROM builds successfully from this tree.
+
+Do not flash images without checking their hashes, partition sizes, device identity, and rollback procedure.
+
+Development history: https://github.com/AtillaTokmak/via_s48_development_wiki
