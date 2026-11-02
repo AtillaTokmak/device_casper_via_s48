@@ -80,9 +80,6 @@ TARGET_RECOVERY_PIXEL_FORMAT := "RGBA_8888"
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := $(DEVICE_PATH)/vintf/compatibility_matrix.4.xml
 DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/vintf/manifest.xml
 
-# Legacy VNDK-29 Support for MediaTek Android 10 Proprietary HALs
-PRODUCT_EXTRA_VNDK_VERSIONS += 29
-
 # SELinux Policy
 BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
 

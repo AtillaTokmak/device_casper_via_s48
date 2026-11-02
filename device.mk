@@ -7,7 +7,10 @@
 DEVICE_PATH := device/casper/via_s48
 
 # Inherit proprietary blobs
-$(call inherit-product, vendor/casper/via_s48/via_s48-vendor.mk)
+$(call inherit-product-if-exists, vendor/casper/via_s48/via_s48-vendor.mk)
+
+# Legacy VNDK-29 Support for MediaTek Android 10 Proprietary HALs
+PRODUCT_EXTRA_VNDK_VERSIONS += 29
 
 # Resource Overlays (RRO)
 DEVICE_PACKAGE_OVERLAYS += $(DEVICE_PATH)/overlay
