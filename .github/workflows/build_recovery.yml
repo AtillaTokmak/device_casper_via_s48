@@ -1,0 +1,106 @@
+name: Build Casper VIA S48 Custom Recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      RECOVERY_FLAVOR:
+        description: 'Recovery Type'
+        required: true
+        default: 'LineageOS'
+        type: choice
+        options:
+          - LineageOS
+          - TWRP
+      MANIFEST_BRANCH:
+        description: 'Manifest Branch'
+        required: true
+        default: 'twrp-11.0'
+        type: choice
+        options:
+          - twrp-11.0
+          - twrp-12.1
+
+jobs:
+  build:
+    name: Compile Recovery for MT8168 (Casper VIA S48)
+    runs-on: ubuntu-20.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout Device Tree
+        uses: actions/checkout@v3
+        with:
+          path: device/casper/via_s48
+
+      - name: Free Disk Space on Runner
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          df -h
+
+      - name: Set up Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
+            libc6-dev-i386 libncurses5 x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev \
+            libxml2 libxml2-utils xsltproc unzip fontconfig python3 cpio bc rsync
+          sudo curl --create-dirs -L -o /usr/local/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
+          sudo chmod a+rx /usr/local/bin/repo
+
+      - name: Initialize Recovery Manifest
+        run: |
+          mkdir -p workdir
+          cd workdir
+          git config --global user.name "Atilla Tokmak"
+          git config --global user.email "atillatokmak@users.noreply.github.com"
+          repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b ${{ github.event.inputs.MANIFEST_BRANCH }} --depth=1
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+
+      - name: Link Device & Dependencies Trees
+        run: |
+          cd workdir
+          # Move checked out device tree
+          rm -rf device/casper/via_s48
+          mkdir -p device/casper
+          mv ../device/casper/via_s48 device/casper/via_s48
+
+          # Clone vendor tree
+          git clone --depth=1 https://github.com/AtillaTokmak/vendor_casper_via_s48.git vendor/casper/via_s48
+
+          # Clone prebuilt or full kernel
+          git clone --depth=1 https://github.com/AtillaTokmak/kernel_casper_mt8168.git kernel/casper/mt8168
+
+      - name: Compile Recovery Image
+        run: |
+          cd workdir
+          source build/envsetup.sh
+          lunch lineage_via_s48-eng || lunch axion_via_s48-eng || lunch twrp_via_s48-eng
+          mka recoveryimage -j$(nproc --all)
+
+      - name: Export Output Recovery Image
+        run: |
+          cd workdir
+          OUT_DIR=$(find out/target/product/ -name "recovery.img" -exec dirname {} \; | head -n 1)
+          echo "OUT_DIR=${OUT_DIR}" >> $GITHUB_ENV
+          mkdir -p ../output
+          cp ${OUT_DIR}/recovery.img ../output/Casper_VIA_S48_Recovery.img
+          sha256sum ../output/Casper_VIA_S48_Recovery.img > ../output/SHA256SUMS.txt
+
+      - name: Upload Recovery Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Casper_VIA_S48_Recovery_${{ github.event.inputs.RECOVERY_FLAVOR }}
+          path: output/*
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            output/Casper_VIA_S48_Recovery.img
+            output/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
